@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recall Radar — Alexa+ simulator</title>
+<style>
+  :root { --bg:#eceae3; --panel:#fbfaf7; --ink:#1a1917; --muted:#6a655d; --line:#dedacd; --accent:#0a8fb0; --accent-bg:#e3f4f9; --user:#1a1917; --user-ink:#fff; --ok:#176b3a; --bad:#b3261e; --code:#f3f1ea; --glow:#27c6e8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d0d0c; --panel:#181715; --ink:#f3efe7; --muted:#a39d92; --line:#2e2b26; --accent:#4fd0ec; --accent-bg:#10303a; --user:#f3efe7; --user-ink:#151412; --ok:#74d69f; --bad:#ff9b8f; --code:#12110f; --glow:#27c6e8; } }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:15px/1.45 -apple-system,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  header { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { margin:0; font-size:16px; letter-spacing:-.01em; display:flex; align-items:center; gap:9px; }
+  header h1 i { width:12px; height:12px; border-radius:50%; background:var(--glow); box-shadow:0 0 0 4px color-mix(in srgb,var(--glow) 25%,transparent); }
+  .tag { border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:12px; color:var(--muted); white-space:nowrap; }
+  .tag.live { color:var(--ok); border-color:var(--ok); } .tag.down { color:var(--bad); border-color:var(--bad); }
+  .spacer { flex:1; }
+  .hbtn { font:inherit; font-size:13px; font-weight:600; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; padding:6px 12px; cursor:pointer; }
+  .hbtn.primary { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .hbtn:hover { border-color:var(--ink); }
+  .note { font-size:12px; color:var(--muted); padding:6px 18px; background:var(--panel); border-bottom:1px solid var(--line); }
+  main { display:grid; grid-template-columns:minmax(290px,340px) minmax(560px,1fr) 0; gap:14px; padding:14px 18px; height:calc(100% - 82px); transition:grid-template-columns .25s; }
+  main.drawer { grid-template-columns:minmax(290px,340px) minmax(480px,1fr) minmax(300px,360px); }
+  @media (max-width:1000px) { main, main.drawer { grid-template-columns:1fr; height:auto; } #proto { display:none; } main.drawer #proto { display:flex; } }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:18px; display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  section > h2 { margin:0; padding:11px 16px; font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:8px; font-weight:700; }
+  #chat { flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px; min-height:200px; scroll-behavior:smooth; }
+  .msg { max-width:90%; padding:10px 13px; border-radius:16px; white-space:pre-wrap; word-wrap:break-word; animation:pop .2s ease both; }
+  .msg.user { align-self:flex-end; background:var(--user); color:var(--user-ink); border-bottom-right-radius:5px; }
+  .msg.bot { align-self:flex-start; background:var(--code); border:1px solid var(--line); border-bottom-left-radius:5px; }
+  .msg.bot .who { display:block; font-size:10.5px; font-weight:800; letter-spacing:.09em; color:var(--accent); margin-bottom:2px; }
+  .msg.sys { align-self:center; color:var(--muted); font-size:12.5px; background:none; padding:2px; text-align:center; }
+  .typing { align-self:flex-start; display:flex; gap:5px; padding:13px 15px; background:var(--code); border:1px solid var(--line); border-radius:16px; border-bottom-left-radius:5px; }
+  .typing i { width:7px; height:7px; border-radius:50%; background:var(--muted); animation:bounce 1s infinite ease-in-out; } .typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:.5} 30%{transform:translateY(-4px);opacity:1} }
+  @keyframes pop { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+  .chips { display:grid; gap:5px; padding:6px 12px 2px; max-height:190px; overflow:auto; }
+  .chips .lbl { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; padding:2px 2px 0; }
+  .chips button { font:inherit; font-size:13px; text-align:left; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; padding:6px 10px; cursor:pointer; display:flex; gap:8px; }
+  .chips button b { color:var(--accent); min-width:14px; }
+  .chips button:hover { border-color:var(--accent); background:var(--accent-bg); }
+  form { display:flex; gap:8px; padding:12px; border-top:1px solid var(--line); align-items:center; }
+  form input[type=text] { flex:1; font:inherit; padding:11px 13px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:0; }
+  button.icon, button.send { font:inherit; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:12px; padding:10px 12px; cursor:pointer; min-height:42px; }
+  button.send { background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:650; }
+  button.icon.on { background:var(--accent); color:#fff; border-color:var(--accent); animation:pulse 1.2s infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 25%,transparent); } }
+  button:focus-visible, input:focus-visible, summary:focus-visible { outline:3px solid var(--accent); outline-offset:1px; }
+
+  /* Echo Show */
+  #stage { display:flex; flex-direction:column; flex:1; min-height:0; padding:16px 18px 12px; gap:12px; overflow:auto; background:radial-gradient(1200px 400px at 50% 0, color-mix(in srgb,var(--glow) 7%,transparent), transparent); }
+  .bezel { background:#0b0b0b; border-radius:30px; padding:16px; box-shadow:0 14px 40px rgba(0,0,0,.28), inset 0 0 0 1px #2a2a2a; position:relative; transition:box-shadow .3s; }
+  .bezel.busy { box-shadow:0 14px 40px rgba(0,0,0,.28), inset 0 0 0 1px #2a2a2a, 0 0 0 3px var(--glow), 0 0 38px color-mix(in srgb,var(--glow) 55%,transparent); }
+  .bezel::after { content:""; position:absolute; left:50%; bottom:5px; width:60px; height:4px; margin-left:-30px; border-radius:4px; background:linear-gradient(90deg,transparent,var(--glow),transparent); opacity:0; transition:opacity .3s; }
+  .bezel.busy::after { opacity:1; }
+  .screen { position:relative; width:100%; aspect-ratio:16/10; overflow:hidden; border-radius:14px; background:#111; }
+  .screen iframe { position:absolute; top:0; left:0; border:0; transform-origin:0 0; background:var(--bg); }
+  .screen .idle { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:#c9c5bb; padding:20px; background:linear-gradient(160deg,#17202a,#0e1318 60%,#0b0f12); }
+  .idle .clock { font-size:min(9vw,64px); font-weight:200; letter-spacing:-.02em; color:#eef3f6; }
+  .idle p { margin:6px 0 0; font-size:14px; color:#9db0bb; }
+  .show-ctl { display:flex; gap:10px; align-items:center; color:var(--muted); font-size:13px; flex-wrap:wrap; }
+  .show-ctl select { font:inherit; padding:5px 9px; border-radius:9px; border:1px solid var(--line); background:var(--panel); color:var(--ink); }
+  #spoken { flex:1; min-width:200px; font-style:italic; }
+
+  /* protocol drawer */
+  #proto { overflow:hidden; opacity:0; pointer-events:none; width:0; border:0; }
+  main.drawer #proto { opacity:1; pointer-events:auto; width:auto; border:1px solid var(--line); }
+  #log { flex:1; overflow:auto; padding:10px 12px; font:12px/1.45 ui-monospace,"SF Mono",Menlo,monospace; display:flex; flex-direction:column; gap:6px; }
+  .ent { border:1px solid var(--line); border-radius:10px; background:var(--code); }
+  .ent summary { cursor:pointer; padding:6px 9px; display:flex; gap:8px; align-items:center; list-style:none; }
+  .ent summary::-webkit-details-marker { display:none; }
+  .ent .m { font-weight:700; } .ent .ms { margin-left:auto; color:var(--muted); }
+  .ent .ms.slow { color:var(--bad); } .ent .ms.fast { color:var(--ok); }
+  .ent pre { margin:0; padding:8px 10px; border-top:1px solid var(--line); overflow:auto; max-height:240px; white-space:pre-wrap; word-break:break-word; }
+  .budget { padding:9px 14px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; gap:10px; align-items:center; }
+  .bar { flex:1; height:8px; background:var(--code); border-radius:99px; overflow:hidden; border:1px solid var(--line); } .bar i { display:block; height:100%; background:var(--ok); width:0; transition:width .3s; }
+  .small { font-size:12px; color:var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <h1><i></i>Recall Radar <span class="small">· Alexa+ simulator</span></h1>
+  <span id="conn" class="tag">connecting…</span>
+  <span class="spacer"></span>
+  <button class="hbtn primary" id="play" type="button">▶ Play demo</button>
+  <button class="hbtn" id="reset" type="button" title="Clear the conversation and saved items">Reset</button>
+  <button class="hbtn" id="drawerBtn" type="button" aria-expanded="false">Under the hood</button>
+</header>
+<div class="note"><b>Simulated host.</b> Alexa+ add-on tooling is partner-only, so this page is a real MCP client (Streamable HTTP: initialize → tools/list → tools/call) and an MCP Apps host. Nothing here is Amazon software.</div>
+<main id="main">
+  <section aria-label="Conversation">
+    <h2>Conversation <label class="small"><input type="checkbox" id="tts"> speak replies</label></h2>
+    <div id="chat" role="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form id="form" autocomplete="off">
+      <button type="button" class="icon" id="mic" title="Speak" aria-label="Speak">🎤</button>
+      <button type="button" class="icon" id="photoBtn" title="Upload a label photo" aria-label="Upload a label photo">📷</button>
+      <input type="file" id="photo" accept="image/*" hidden>
+      <input type="text" id="input" placeholder="Alexa, check this used high chair for recalls…" aria-label="Message">
+      <button class="send" type="submit">Send</button>
+    </form>
+  </section>
+
+  <section aria-label="Echo Show screen">
+    <h2>Echo Show <span class="small">MCP App · <span id="uiState">idle</span></span></h2>
+    <div id="stage">
+      <div class="bezel" id="bezel"><div class="screen" id="screen"><div class="idle" id="idle"><div><div class="clock" id="clock">12:00</div><p>“Alexa, check this used high chair for recalls.”</p></div></div></div></div>
+      <div class="show-ctl"><label>Screen <select id="size"><option value="1280x800">Echo Show 8 · 1280×800</option><option value="1024x600">Echo Show 5/10 · 1024×600</option><option value="800x1280">Portrait · 800×1280</option></select></label><span id="spoken"></span></div>
+    </div>
+  </section>
+
+  <section aria-label="Protocol log" id="proto">
+    <h2>Under the hood <button class="hbtn" id="clearLog" style="padding:2px 9px;font-size:12px">clear</button></h2>
+    <div id="log"></div>
+    <div class="budget"><span>Alexa+ budget 500 ms</span><div class="bar"><i id="barFill"></i></div><span id="lastMs">–</span></div>
+  </section>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

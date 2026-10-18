@@ -1,0 +1,27 @@
+{
+  "name": "recall-radar",
+  "version": "0.1.0",
+  "description": "An MCP server that checks baby gear (bought, borrowed or secondhand) against official CPSC and NHTSA recalls, and guides you through the fix.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "sync": "tsx scripts/sync-data.ts",
+    "start": "tsx src/http.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "bench": "tsx bench/run.ts",
+    "typecheck": "tsc --noEmit",
+    "coverage": "tsx scripts/coverage.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
