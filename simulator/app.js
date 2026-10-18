@@ -245,7 +245,7 @@ const STORY = [
   "What do I do about it?",
   "I requested the refund",
   "Where were we with the high chair?",
-  "Actually, I got the date wrong, it was made in November 2021",
+  "My friend's Peg Perego Tatamia high chair is the same model, made in November 2021",
   "Check a Graco SnugRide Turn & Slide car seat made January 2026",
 ];
 const chipsEl = $("#chips");
