@@ -15,7 +15,7 @@ Check used baby gear against official recalls, and see exactly why. An MCP serve
 
 ## Links
 - **Code (public, MIT):** https://github.com/muhammedidris004/recall-radar
-- **Demo video (public, 2:50):** https://youtu.be/o2XYuYKz5_U
+- **Demo video (public, 2:50, narrated with a local open-source voice, captions on):** https://youtu.be/ra51u2v-cRU
 
 ## Description
 

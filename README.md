@@ -4,6 +4,8 @@
 
 Recall Radar is an [MCP](https://modelcontextprotocol.io) server (Streamable HTTP, spec 2025-11-25) built for an Alexa+-style voice and screen assistant. A parent says *"I'm buying a used Peg Perego high chair, can you check it for recalls?"*. Recall Radar works out what it needs to know (usually the model number and date on the label), reads the label from a typed line, a spoken line or a **photo**, decides whether a recall applies, shows *how it decided*, and then tracks the remedy until it's done.
 
+**Demo video (2:50):** https://youtu.be/ra51u2v-cRU
+
 > Built for the [Amazon Developer Hackathon](https://amazonappdev2026.devpost.com/), **Alexa+ track**.
 > Alexa+ add-on tooling is partner-only, so the demo runs through a **simulated Alexa+ host** included in this repo (a real MCP client and MCP Apps host). Nothing in this repo is Amazon software. See [Simulation](#simulation).
 
@@ -158,6 +160,9 @@ bench/      generated benchmark
 scripts/    sync-data.ts, coverage.ts
 docs/       results.txt, DEMO_SCRIPT.md, FRICTION_LOG.md
 ```
+
+## Credits
+Narration voice: Kokoro-82M (Apache-2.0), run locally; see [`docs/VOICE.md`](docs/VOICE.md).
 
 ## License
 
