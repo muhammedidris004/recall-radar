@@ -15,6 +15,7 @@ import { FileCaseStore, CASE_STATUSES, newCase, type Case, type CaseStatus, type
 import { parseLabel, labelGaps } from "./label.ts";
 import { present, toView, shortTitle, firstSentence, DISCLAIMER, type CheckView } from "./present.ts";
 import type { ItemQuery } from "./types.ts";
+import { brandKey, productTypes } from "./text.ts";
 
 export const UI_URI = "ui://recall-radar/result";
 export const UI_MIME = "text/html;profile=mcp-app";
@@ -92,13 +93,36 @@ export function createServer(deps: ServerDeps = { engine: new RadarEngine(), cas
     contents: [{ uri: uri.href, mimeType: UI_MIME, text: uiHtml(), _meta: { ui: { prefersBorder: false } } }],
   }));
 
+  const nameKey = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const brandOf = (x: ItemQuery) => x.brand ?? (x.description ? engine.index.inferBrand(x.description) : undefined);
+  /** Could these two descriptions be the same physical item? A different brand or product type means no. */
+  function sameItem(a: ItemQuery, b: ItemQuery): boolean {
+    const ba = brandOf(a), bb = brandOf(b);
+    if (ba && bb && brandKey(ba) !== brandKey(bb)) return false;
+    const ta = productTypes(a.description ?? ""), tb = productTypes(b.description ?? "");
+    if (ta.size && tb.size && ![...ta].some((t) => tb.has(t))) return false;
+    return true;
+  }
+
   /** Shared by check_item and check_label. */
   function runCheck(q: ItemQuery, nickname: string | undefined): CheckView {
     let c: Case | undefined;
     if (nickname) {
-      c = cases.find(nickname);
-      if (c) q = { ...c.item, ...q }; // new details override, old ones carry over
-      else c = newCase(nickname, q);
+      const hit = cases.find(nickname);
+      // Reuse a saved item only for the same name AND the same item. A fuzzy name match must never carry
+      // another item's model number or date into this check (found when a real assistant asked about a
+      // Bicystar chair and got a Peg Perego recall back).
+      if (hit && nameKey(hit.nickname) === nameKey(nickname) && sameItem(hit.item, q)) {
+        c = hit;
+        q = { ...c.item, ...q }; // new details override, old ones carry over
+      } else {
+        // Two different items may not share a name; keep the second one's name distinct ("highchair (Bicystar)").
+        const taken = new Set(cases.list().map((x) => nameKey(x.nickname)));
+        const brand = brandOf(q);
+        let name = nickname;
+        for (let i = 2; taken.has(nameKey(name)); i++) name = brand && i === 2 ? `${nickname} (${brand})` : `${nickname} (${i})`;
+        c = newCase(name, q);
+      }
       c.item = q;
     }
     const res = engine.check(q);

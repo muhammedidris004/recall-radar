@@ -66,7 +66,7 @@ Requires Node 22+ (developed on 24). Optional: `tesseract` for label-photo OCR (
 ```bash
 npm install
 npm start            # MCP server + simulator on http://127.0.0.1:3333
-npm test             # 54 tests, incl. real end-to-end scenarios
+npm test             # 58 tests, incl. real end-to-end scenarios and an in-memory MCP client
 npm run bench        # generated benchmark
 npm run sync         # refresh the CPSC + NHTSA snapshots (data/*.json)
 ```
@@ -111,6 +111,9 @@ The hackathon FAQ states that the Alexa+ MCP toolkit, CLI and web simulator are 
 - a thin **rule-based "Alexa"** that routes utterances to tools. It is deliberately small; all recall logic lives in the server, so a real LLM host would replace only this router;
 - voice in/out via the browser's Web Speech API, label-photo upload via local Tesseract OCR, and a live protocol drawer ("Under the hood") with the 500 ms latency budget;
 - **▶ Play demo** types and runs the whole story hands-free (for recording), and **Reset** clears the conversation and saved items.
+
+### Tested with a real AI assistant
+Besides the simulator, we connected **Claude Code** (a real MCP-speaking assistant) to the server with built-in tools disabled and gave it plain-English requests. It found and used the right tool on its own, asked for the exact missing detail, and **found a real bug** (a fuzzy saved-item name merged one item's model number into another item's check; now fixed and pinned by tests). Transcripts and the reproduction command are in [`docs/REAL_ASSISTANT_RUNS.md`](docs/REAL_ASSISTANT_RUNS.md).
 
 ### The reusable part: `mcp-apps-sim`
 The simulator's generic half (an MCP client, an MCP Apps host, pre-flight checks and tool forms) is published as its own open-source project, usable with **any** MCP server: **https://github.com/muhammedidris004/mcp-apps-sim**. For example, to run its pre-flight checks and app renderer against this server:
