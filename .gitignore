@@ -3,3 +3,4 @@ node_modules
 data/cases.json
 .env
 recordings
+.DS_Store
