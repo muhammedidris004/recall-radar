@@ -11,7 +11,7 @@ Check used baby gear against official recalls, and see exactly why. An MCP serve
 ## Track and mini challenges
 - **Primary track:** Alexa+ (self-hosted MCP server, Streamable HTTP, spec 2025-11-25, plus a simulated Alexa+ experience in a web app).
 - **AWS Builder mini challenge:** not entering (no AWS services are used).
-- **Open Source mini challenge:** see the note at the bottom before ticking this box.
+- **Open Source mini challenge:** Yes, with the additional project below.
 
 ## Links
 - **Code (public, MIT):** https://github.com/muhammedidris004/recall-radar
@@ -78,5 +78,8 @@ No. The whole project was started and built within the submission window (first 
 
 **Friction log.** Ten entries with task, expected vs actual, severity, workaround and suggestion: https://github.com/muhammedidris004/recall-radar/blob/main/docs/FRICTION_LOG.md
 
-## Note on the Open Source mini challenge
-The rules ask for "a new, additional open-source project … or a contribution (a branch, a fork, or a pull request) to a public repository" alongside the primary submission. Recall Radar is itself MIT-licensed, but it is the primary submission, so it may not count as the *additional* project. Two ways to qualify, if you want that $5,000 prize: (1) split the simulator (`simulator/`) into its own small public repo as a reusable "MCP Apps host and test client", or (2) open a pull request, even a documentation fix, to a public repository you used (for example the MCP specification or SDK docs). Neither is done yet.
+## Open Source mini challenge (entered)
+- **Contribution URL:** https://github.com/muhammedidris004/mcp-apps-sim
+- **Project repository URL:** https://github.com/muhammedidris004/mcp-apps-sim
+- **GitHub username:** muhammedidris004
+- **What I did, how it works, why it matters:** `mcp-apps-sim` is a new, separate MIT-licensed project built during the hackathon window: a browser-based MCP Apps host and test client for any MCP server. Alexa+'s add-on tooling and web simulator are partner-only, so there was no way to test a voice-and-screen MCP server end to end. You point the tool at any Streamable HTTP MCP server (`npx github:muhammedidris004/mcp-apps-sim <url>`) and get: pre-flight checks drawn from the public Alexa+ MCP docs (handshake across protocol versions, capabilities, tool description and schema quality, `ui://` resources and MIME type, round-trip latency against a 500 ms budget); tool forms generated from JSON Schema; a sandboxed MCP Apps host that renders `_meta.ui.resourceUri` apps on Echo Show-sized screens and bridges `ui/*` and `tools/call` over `postMessage`; and a protocol log with browser and server timings. A small CLI proxy lets it work with servers that send no CORS headers, and never exposes `--header` secrets to the page. It has no dependencies and 16 tests against a fake MCP server, including deliberately bad servers. It matters because the same gap blocks every hackathon entrant (and every developer building an MCP App) who cannot reach a real host: it makes the MCP Apps path testable and catches problems such as a wrong MIME type, a vague tool description, or an over-budget response before they reach a user. It is the generic half of the simulator used by the primary submission, Recall Radar.

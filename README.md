@@ -112,6 +112,14 @@ The hackathon FAQ states that the Alexa+ MCP toolkit, CLI and web simulator are 
 - voice in/out via the browser's Web Speech API, label-photo upload via local Tesseract OCR, and a live protocol drawer ("Under the hood") with the 500 ms latency budget;
 - **▶ Play demo** types and runs the whole story hands-free (for recording), and **Reset** clears the conversation and saved items.
 
+### The reusable part: `mcp-apps-sim`
+The simulator's generic half (an MCP client, an MCP Apps host, pre-flight checks and tool forms) is published as its own open-source project, usable with **any** MCP server: **https://github.com/muhammedidris004/mcp-apps-sim**. For example, to run its pre-flight checks and app renderer against this server:
+
+```bash
+npm start                                          # Recall Radar on :3333
+npx github:muhammedidris004/mcp-apps-sim http://127.0.0.1:3333/mcp
+```
+
 ## Architecture
 
 ```
